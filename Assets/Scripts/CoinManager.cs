@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class CoinManager : MonoBehaviour
 {
@@ -6,6 +7,8 @@ public class CoinManager : MonoBehaviour
 
     public int coinInRun = 0;
     public int totalCoin = 0;
+
+    public event Action OnCoinChanged; // 🔥 THÊM DÒNG NÀY
 
     private void Awake()
     {
@@ -40,12 +43,18 @@ public class CoinManager : MonoBehaviour
         Debug.Log("Saved TotalCoin = " + totalCoin);
 
         coinInRun = 0;
+
+        OnCoinChanged?.Invoke(); // 🔥 QUAN TRỌNG
     }
 
     public void LoadTotalCoin()
     {
         totalCoin = PlayerPrefs.GetInt("TotalCoin", 0);
         Debug.Log("Loaded TotalCoin = " + totalCoin);
+    }
+    public void ForceUpdateUI()
+    {
+        OnCoinChanged?.Invoke();
     }
 
     public bool SpendCoin(int amount)
@@ -55,6 +64,9 @@ public class CoinManager : MonoBehaviour
             totalCoin -= amount;
             PlayerPrefs.SetInt("TotalCoin", totalCoin);
             PlayerPrefs.Save();
+
+            OnCoinChanged?.Invoke(); // 🔥 QUAN TRỌNG
+
             return true;
         }
 

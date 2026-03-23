@@ -2,7 +2,8 @@
 
 public class Bullet : MonoBehaviour
 {
-    private int damage; // 🔥 damage của đạn
+    private int damage;
+    private bool hasHit = false;
 
     public void SetDamage(int dmg)
     {
@@ -11,17 +12,20 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // 🎯 Nếu trúng enemy
+        if (hasHit) return;
+
         if (collision.CompareTag("Enemy"))
         {
-            Enemy enemy = collision.GetComponent<Enemy>();
+            hasHit = true;
 
+            Enemy enemy = collision.GetComponentInParent<Enemy>();
             if (enemy != null)
             {
+                Debug.Log("Bullet hit enemy | damage = " + damage);
                 enemy.TakeDamage(damage);
             }
 
-            Destroy(gameObject); // hủy đạn
+            Destroy(gameObject);
         }
     }
 }

@@ -21,8 +21,21 @@ public class Gun : MonoBehaviour
     [SerializeField] private TextMeshProUGUI ammoText;
     [SerializeField] private AudioManager audioManager;
 
-    // 🔥 THÊM DAMAGE
     [SerializeField] private int damage = 10;
+
+    [Header("Gun Visual")]
+    [SerializeField] private SpriteRenderer gunSpriteRenderer;
+    [SerializeField] private Sprite pistolSprite;
+    [SerializeField] private Sprite rifleSprite;
+    [SerializeField] private Sprite plasmaSprite;
+
+    [Header("Gun Scale")]
+    [SerializeField] private Vector3 pistolScale = new Vector3(0.6f, 0.64f, 1f);
+    [SerializeField] private Vector3 rifleScale = new Vector3(0.28f, 0.28f, 1f);
+    [SerializeField] private Vector3 plasmaScale = new Vector3(0.28f, 0.28f, 1f);
+
+    private string currentGunId;
+    private int equippedWeaponIndex;
 
     void Awake()
     {
@@ -32,6 +45,7 @@ public class Gun : MonoBehaviour
     void Start()
     {
         currentAmmo = maxAmmo;
+        LoadEquippedWeapon();
         UpdateAmmoText();
     }
 
@@ -42,7 +56,6 @@ public class Gun : MonoBehaviour
         Reload();
     }
 
-    // 🔫 XOAY SÚNG
     void RotateGun()
     {
         if (Input.mousePosition.x < 0 || Input.mousePosition.x > Screen.width ||
@@ -57,16 +70,11 @@ public class Gun : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, angle + rotateOffset);
 
         if (angle < -90 || angle > 90)
-        {
-            transform.localScale = new Vector3(1, 1, 1);
-        }
+            transform.localScale = new Vector3(transform.localScale.x, Mathf.Abs(transform.localScale.y), 1);
         else
-        {
-            transform.localScale = new Vector3(1, -1, 1);
-        }
+            transform.localScale = new Vector3(transform.localScale.x, -Mathf.Abs(transform.localScale.y), 1);
     }
 
-    // 🔫 BẮN
     void Shoot()
     {
         if (Input.GetMouseButtonDown(0) && currentAmmo > 0 && Time.time > nextShot)
@@ -75,31 +83,33 @@ public class Gun : MonoBehaviour
 
             GameObject bullet = Instantiate(bulletPrefabs, firePos.position, firePos.rotation);
 
-            // 🔥 TRUYỀN DAMAGE SANG BULLET
-            Bullet b = bullet.GetComponent<Bullet>();
+            PlayerBullet b = bullet.GetComponent<PlayerBullet>();
             if (b != null)
             {
                 b.SetDamage(damage);
+                Debug.Log("Ban dan voi damage = " + damage + " | Gun = " + currentGunId);
             }
 
             currentAmmo--;
             UpdateAmmoText();
-            audioManager.PlayShootSound();
+
+            if (audioManager != null)
+                audioManager.PlayShootSound();
         }
     }
 
-    // 🔄 NẠP ĐẠN
     void Reload()
     {
         if (Input.GetMouseButtonDown(1) && currentAmmo < maxAmmo)
         {
             currentAmmo = maxAmmo;
             UpdateAmmoText();
-            audioManager.PlayReloadSound();
+
+            if (audioManager != null)
+                audioManager.PlayReloadSound();
         }
     }
 
-    // 🧾 UI ĐẠN
     private void UpdateAmmoText()
     {
         if (ammoText != null)
@@ -108,16 +118,62 @@ public class Gun : MonoBehaviour
         }
     }
 
-    // 🔥 HÀM NÂNG CẤP DAMAGE (SHOP GỌI)
     public void SetDamage(int newDamage)
     {
         damage = newDamage;
-        Debug.Log("Damage mới: " + damage);
+        Debug.Log("Damage moi: " + damage);
     }
 
-    // (OPTION) Lấy damage nếu cần
     public int GetDamage()
     {
         return damage;
+    }
+
+    public void LoadEquippedWeapon()
+    {
+        equippedWeaponIndex = PlayerPrefs.GetInt("equipped_weapon", 0);
+
+        if (equippedWeaponIndex == 0)
+        {
+            currentGunId = "PistolDefault";
+            damage = 10;
+
+            if (gunSpriteRenderer != null)
+                gunSpriteRenderer.sprite = pistolSprite;
+
+            transform.localScale = pistolScale;
+        }
+        else if (equippedWeaponIndex == 1)
+        {
+            currentGunId = "RifleLv1";
+            damage = 20;
+
+            if (gunSpriteRenderer != null)
+                gunSpriteRenderer.sprite = rifleSprite;
+
+            transform.localScale = rifleScale;
+        }
+        else if (equippedWeaponIndex == 2)
+        {
+            currentGunId = "PlasmaGun";
+            damage = 35;
+
+            if (gunSpriteRenderer != null)
+                gunSpriteRenderer.sprite = plasmaSprite;
+
+            transform.localScale = plasmaScale;
+        }
+        else
+        {
+            currentGunId = "PistolDefault";
+            damage = 10;
+
+            if (gunSpriteRenderer != null)
+                gunSpriteRenderer.sprite = pistolSprite;
+
+            transform.localScale = pistolScale;
+        }
+
+        Debug.Log("Equipped Weapon Index = " + equippedWeaponIndex + " | Gun = " + currentGunId + " | Damage = " + damage);
     }
 }

@@ -1,39 +1,49 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerBullet : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 25f;
-    [SerializeField] private float timeDestroy = 0.5f; //tgian ton tai cua dan
-    [SerializeField] private float damage = 10f;
-    [SerializeField] GameObject bloodPrefabs;
-    void Start()
+    [SerializeField] private float speed = 12f;
+    [SerializeField] private float lifeTime = 2f;
+
+    private int damage;
+    private bool hasHit = false;
+
+    public void SetDamage(int dmg)
     {
-        Destroy(gameObject, timeDestroy);
+        damage = dmg;
     }
 
-    
-    void Update()
+    public int GetDamage()
     {
-        MoveBullet();
+        return damage;
     }
-    void MoveBullet()
+
+    private void Start()
     {
-        transform.Translate(Vector2.right * moveSpeed * Time.deltaTime);
+        Destroy(gameObject, lifeTime);
     }
+
+    private void Update()
+    {
+        transform.Translate(Vector2.right * speed * Time.deltaTime);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (hasHit) return;
+
         if (collision.CompareTag("Enemy"))
         {
-            Enemy enemy = collision.GetComponent<Enemy>();
+            hasHit = true;
+
+            Enemy enemy = collision.GetComponentInParent<Enemy>();
             if (enemy != null)
             {
+                Debug.Log("PlayerBullet hit | damage = " + damage);
                 enemy.TakeDamage(damage);
-                GameObject blood = Instantiate(bloodPrefabs, transform.position, Quaternion.identity);
-                Destroy(blood, 1f);
             }
-            Destroy(gameObject); 
+
+            Destroy(gameObject);
         }
     }
 }

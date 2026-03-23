@@ -39,10 +39,16 @@ public abstract class Enemy : MonoBehaviour
     }
     public virtual void TakeDamage(float damage)
     {
-        currentHp-=damage;
+        Debug.Log("Enemy TakeDamage | damage = " + damage + " | HP truoc = " + currentHp);
+
+        currentHp -= damage;
         currentHp = Mathf.Max(currentHp, 0);
+
+        Debug.Log("Enemy HP sau = " + currentHp);
+
         UpdateHpBar();
-        if(currentHp <= 0)
+
+        if (currentHp <= 0)
         {
             Die();
         }

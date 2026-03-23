@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private GameObject scoreUI;
     [SerializeField] private GameObject shopButton;
+    [SerializeField] private GameObject coinIcon;
 
     public static GameManager instance;
 
@@ -32,6 +33,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        InitWeaponData();
+
         UpdateCoinUI();
         UpdateScore();
         currentEnergy = 0;
@@ -41,11 +44,36 @@ public class GameManager : MonoBehaviour
         audioManager.StopAudioGame();
     }
 
+    private void InitWeaponData()
+    {
+        if (!PlayerPrefs.HasKey("Gun_Default_Unlocked"))
+        {
+            PlayerPrefs.SetInt("Gun_Default_Unlocked", 1);
+        }
+
+        if (!PlayerPrefs.HasKey("CurrentGun"))
+        {
+            PlayerPrefs.SetString("CurrentGun", "DefaultGun");
+        }
+
+        if (!PlayerPrefs.HasKey("GunDamage_DefaultGun"))
+        {
+            PlayerPrefs.SetInt("GunDamage_DefaultGun", 10);
+        }
+
+        if (!PlayerPrefs.HasKey("GunDamage_GunLv1"))
+        {
+            PlayerPrefs.SetInt("GunDamage_GunLv1", 20);
+        }
+
+        PlayerPrefs.Save();
+    }
+
     private void UpdateCoinUI()
     {
         if (coinText != null && CoinManager.Instance != null)
         {
-            coinText.text = "Coin: " + CoinManager.Instance.coinInRun;
+            coinText.text = CoinManager.Instance.coinInRun.ToString();
         }
     }
 
@@ -69,7 +97,7 @@ public class GameManager : MonoBehaviour
     {
         if (scoreText != null)
         {
-            scoreText.text = "Score: " + score.ToString();
+            scoreText.text = score.ToString();
         }
     }
 
@@ -117,7 +145,12 @@ public class GameManager : MonoBehaviour
         }
 
         Time.timeScale = 0f;
+        if (coinIcon != null)
+        {
+            coinIcon.SetActive(false);
+        }
     }
+
 
     public void OpenMainMenu()
     {
@@ -127,7 +160,12 @@ public class GameManager : MonoBehaviour
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
         Time.timeScale = 0f;
+        if (coinIcon != null)
+        {
+            coinIcon.SetActive(false);
+        }
     }
+
 
     public void GameOverMenu()
     {
@@ -142,6 +180,10 @@ public class GameManager : MonoBehaviour
         winMenu.SetActive(false);
         scoreUI.SetActive(false);
         Time.timeScale = 0f;
+        if (coinIcon != null)
+        {
+            coinIcon.SetActive(false);
+        }
     }
 
     public void PauseGameMenu()
@@ -177,6 +219,10 @@ public class GameManager : MonoBehaviour
 
         Time.timeScale = 1f;
         audioManager.PlayDefaultSound();
+        if (coinIcon != null)
+        {
+            coinIcon.SetActive(true);
+        }
     }
 
     public void ResumeGame()
@@ -192,5 +238,9 @@ public class GameManager : MonoBehaviour
         }
 
         Time.timeScale = 1f;
+        if (coinIcon != null)
+        {
+            coinIcon.SetActive(true);
+        }
     }
 }
